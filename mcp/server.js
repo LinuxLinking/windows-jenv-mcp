@@ -1641,6 +1641,13 @@ async function handleRequest(message) {
 
   if (method === 'ping') return {};
 
+  // Standard client -> server notifications carry no id and expect no result.
+  // `notifications/initialized` is sent by every client right after the
+  // initialize handshake. Returning here (instead of falling through to the
+  // "-32601 Method not found" throw at the end) avoids a misleading
+  // "notification notifications/initialized failed" log line on every startup.
+  if (typeof method === 'string' && method.startsWith('notifications/')) return {};
+
   if (method === 'tools/list') {
     return {
       tools: visibleTools().map((t) => ({
