@@ -59,14 +59,22 @@ if not defined GLOBAL_OK (
     goto :eof
 )
 
-REM Persist JAVA_HOME for new shells at USER scope. The value is the jenv proxy
-REM directory (JENV_ROOT), NOT the real JDK path -- see the note at the top of
-REM this file. The original PowerShell version wrote User scope as well. `/M`
-REM writes HKLM instead, which demands administrator rights for something that
-REM only ever needs to affect the current user - and it also meant the
-REM global.txt write above happened before the privilege check, so a non-admin
-REM run silently changed the effective JDK and then reported failure.
-setx JAVA_HOME "!JENV_ROOT!" >nul
+REM JAVA_HOME is a CONSTANT: it always points at the jenv proxy dir (JENV_ROOT)
+REM at BOTH scopes -- user (HKCU) and system (HKLM). Switching the JDK only
+REM rewrites global.txt above; a real JDK path must NEVER be written into
+REM JAVA_HOME. Machine scope needs admin: when elevated we set both scopes;
+REM otherwise we still fix the user scope and VERIFY the machine scope, warning
+REM if it points somewhere else (e.g. a real JDK left by an older install).
+net session >nul 2>&1
+if errorlevel 1 (
+    setx JAVA_HOME "!JENV_ROOT!" >nul
+    set "MACHINE_JH="
+    for /f "tokens=2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v JAVA_HOME 2^>nul ^| findstr /i "JAVA_HOME"') do set "MACHINE_JH=%%b"
+    if /i not "!MACHINE_JH!"=="!JENV_ROOT!" echo WARNING: system-level JAVA_HOME is "!MACHINE_JH!" but should be "!JENV_ROOT!". Re-run as administrator once to fix it.
+) else (
+    setx JAVA_HOME "!JENV_ROOT!" /M >nul
+    setx JAVA_HOME "!JENV_ROOT!" >nul
+)
 
 REM Sync the current shell too. The help text promises this applies "globaly for all
 REM restarted shells and this one", and the old `set "JAVA_HOME=..."` could not deliver
