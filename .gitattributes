@@ -1,0 +1,11 @@
+# Default: normalize text files in the repo, keep working-tree EOL as-is.
+* text=auto
+
+# Batch scripts must stay CRLF in the working tree on Windows.
+*.bat eol=crlf
+*.cmd eol=crlf
+
+# JS/Markdown/JSON as LF in the repo.
+*.js eol=lf
+*.md eol=lf
+*.json eol=lf
