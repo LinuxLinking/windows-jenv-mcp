@@ -6,7 +6,7 @@ build can run under one JDK without touching another.
 
 ## Attribution and differences from upstream
 
-This repository (`[REPO_NAME]`) is a from-scratch **cmd/batch** implementation
+This repository (`JEnv-for-Windows-mcp`) is a from-scratch **cmd/batch** implementation
 of **JEnv-for-Windows** ([github.com/FelixSelter/JEnv-for-Windows](https://github.com/FelixSelter/JEnv-for-Windows),
 Copyright Felix Selter and contributors, Apache License 2.0). It is not a
 direct port: nothing of the upstream's PowerShell code remains. See `LICENSE`
