@@ -4,10 +4,30 @@ Switch between installed JDKs by name. `java` on `PATH` is intercepted by a smal
 `java.bat` shim that resolves the JDK you selected and forwards to it — so a
 build can run under one JDK without touching another.
 
-This is a from-scratch cmd/batch implementation of the PowerShell original
-([JEnv-for-Windows](https://github.com/FelixSelter/JEnv-for-Windows)). The
-reference is at `..\JEnv-for-Windows-main` if you need to compare; this port
-intentionally differs in the areas called out below.
+## Attribution and differences from upstream
+
+This repository (`[REPO_NAME]`) is a from-scratch **cmd/batch** implementation
+of **JEnv-for-Windows** ([github.com/FelixSelter/JEnv-for-Windows](https://github.com/FelixSelter/JEnv-for-Windows),
+Copyright Felix Selter and contributors, Apache License 2.0). It is not a
+direct port: nothing of the upstream's PowerShell code remains. See `LICENSE`
+and `NOTICE` for the legal bits.
+
+The most important behavioral difference:
+
+> **In this implementation `JAVA_HOME` always points at the JEnv directory, at
+> the user and system scope. A real JDK path is never written into `JAVA_HOME`.**
+> In the upstream PowerShell implementation, `jenv change` writes the real JDK
+> path into `JAVA_HOME` (session and registry). This port reverses that
+> deliberately, so `jenv use` / `jenv local` always reach tools that read
+> `%JAVA_HOME%` — at the cost of `Gradle`-style tools that need a real
+> `%JAVA_HOME%\bin\java.exe` (the JEnv directory holds `java.bat`, not
+> `java.exe`; use `java` from `PATH`).
+
+Other notable differences: this implementation is pure batch (no PowerShell
+dependency), uses three plain-text registry files instead of JSON, and ships
+its own one-time `jenv install` (upstream detects and configures PATH on every
+invocation). See `mcp/README.md` for the MCP server, which has no upstream
+equivalent.
 
 ---
 
