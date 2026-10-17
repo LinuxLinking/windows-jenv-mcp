@@ -43,11 +43,13 @@ REM Restore JAVA_HOME to the chosen JDK. Do NOT `set "JAVA_HOME=..."` here: this
 REM runs under setlocal, so a plain assignment is discarded on exit and the caller's shell
 REM would keep its old value - the setx below is the only thing that persists. That is
 REM also where the original script broke, persisting an undefined variable machine-wide.
+set "ADMIN=0"
 net session >nul 2>&1
 if errorlevel 1 (
     setx JAVA_HOME "!JPATH!" >nul
     echo ^(Non-admin^) Set user-level JAVA_HOME. New shells will use it.
 ) else (
+    set "ADMIN=1"
     setx JAVA_HOME "!JPATH!" /M >nul
 )
 
@@ -64,6 +66,18 @@ if defined UPATH (
 ) else (
     reg add HKCU\Environment /v PATH /t REG_EXPAND_SZ /d "!JPATH!\bin" /f >nul
 )
+
+REM Remove the jenv proxy dir from PATH, so uninstall leaves no stale entry
+REM pointing at the folder that is about to be deleted. Under the proxy
+REM architecture the install step prepends JENV_ROOT to Machine PATH, so that
+REM (and User PATH) is where it can hide. User PATH is always editable;
+REM Machine PATH needs admin.
+REM Read PATH with DoNotExpandEnvironmentNames and write it back as ExpandString:
+REM reading via [Environment]::GetEnvironmentVariable would expand %USERPROFILE%,
+REM %NVM_HOME%, ... into literals and permanently destroy those references.
+echo Removing JEnv proxy dir from PATH. This could take a moment
+powershell -NoProfile -Command "$p='!JENV_ROOT!'; $opts=[Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames; function JenvRmPath($k){ if($k){ $raw=$k.GetValue('PATH',$null,$opts); if($raw){ $parts=$raw -split ';' | Where-Object { $_ -ne '' -and $_.TrimEnd('\') -ne $p.TrimEnd('\') }; $k.SetValue('PATH',($parts -join ';'),[Microsoft.Win32.RegistryValueKind]::ExpandString) }; $k.Close() } }; JenvRmPath ([Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment',$true)); if (%ADMIN%) { JenvRmPath ([Microsoft.Win32.Registry]::LocalMachine.OpenSubKey('SYSTEM\CurrentControlSet\Control\Session Manager\Environment',$true)) }"
+if not "%ADMIN%"=="1" echo ^(Non-admin^) Machine PATH was not cleaned. If JEnv was added there, remove "!JENV_ROOT!" manually.
 
 REM Confirmation 2 (default Yes = keep config)
 set /p CONFIRM2="Do you want to keep your config file? [Y/n] "
