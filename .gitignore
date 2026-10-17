@@ -12,6 +12,9 @@ _probe-*/
 # Stray scratch note from an earlier session
 redirect
 
+# Leftover fake-JDK fixture (tests build their own in %TEMP%)
+.testjdk/
+
 # Editor / OS cruft
 Thumbs.db
 *.tmp
