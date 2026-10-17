@@ -33,6 +33,7 @@ if /i "%ACTION%"=="local"     goto :dispatch
 if /i "%ACTION%"=="getjava"   goto :dispatch
 if /i "%ACTION%"=="link"      goto :dispatch
 if /i "%ACTION%"=="uninstall" goto :dispatch
+if /i "%ACTION%"=="install"  goto :dispatch
 if /i "%ACTION%"=="autoscan"  goto :dispatch
 
 if "%ACTION%"=="" goto :help
@@ -56,6 +57,7 @@ echo "jenv use <name>"                      Applys the given Java-Version locall
 echo "jenv local <name>"                    Will use the given Java-Version whenever in this folder. Will set the Java-version for all subfolders as well
 echo "jenv link <executable>"               Creates shortcuts for executables inside JAVA_HOME. For example "javac"
 echo "jenv uninstall <name>"                Deletes JEnv and restores the specified java version to the system. You may keep your config file
+echo "jenv install"                         One-time setup: points JAVA_HOME at the JEnv directory and puts it first on PATH. Run as Administrator for the whole machine
 echo "jenv autoscan [--yes|-y] ?<path>?"    Will scan the given path for java installations and ask to add them to JEnv. Path is optional and "--yes|-y" accepts defaults.
 echo Get help for individual commands using "jenv <list/add/remove/change/use/local> --help"
 goto :eof
